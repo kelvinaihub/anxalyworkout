@@ -113,16 +113,16 @@ YOUR ENTIRE RESPONSE MUST be a single, raw JSON object that strictly follows the
 
   const updatedPrompt = `${prompt}\n\n${strictInstructions}`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: updatedPrompt,
-    config: {
-      responseMimeType: 'application/json',
-      responseSchema: workoutPlanSchema,
-    },
-  });
-
   try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: updatedPrompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: workoutPlanSchema,
+      },
+    });
+
     const text = response.text;
     const jsonStr = text.replace(/```json/g, '').replace(/```/g, '');
     const parsedJson = JSON.parse(jsonStr);
@@ -140,10 +140,10 @@ YOUR ENTIRE RESPONSE MUST be a single, raw JSON object that strictly follows the
       console.error("Generated JSON is not in the expected format.", parsedJson);
       throw new Error("Generated JSON is not in the expected format.");
     }
-  } catch (e) {
-    console.error("Failed to parse Gemini response:", e);
-    console.error("Raw response:", response.text);
-    throw new Error("The AI returned an invalid response. Please try again.");
+  } catch (e: any) {
+    console.error("Failed to generate or parse Gemini response:", e);
+    // console.error("Raw response:", response.text); // response might be undefined here
+    throw new Error(`The AI returned an invalid response or failed to connect. ${e.message || ''}`);
   }
 };
 
@@ -169,10 +169,13 @@ export const generateExerciseImage = async (exerciseName: string, gender: 'male'
         },
       });
 
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData) {
-          const base64ImageBytes: string = part.inlineData.data;
-          return `data:image/png;base64,${base64ImageBytes}`;
+      const candidates = response.candidates;
+      if (candidates && candidates[0] && candidates[0].content && candidates[0].content.parts) {
+        for (const part of candidates[0].content.parts) {
+          if (part.inlineData) {
+            const base64ImageBytes: string = part.inlineData.data;
+            return `data:image/png;base64,${base64ImageBytes}`;
+          }
         }
       }
       throw new Error("AI did not return an image part in the response.");
