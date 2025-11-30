@@ -1,61 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KelvinFit</title>
-    
-    <!-- PWA Tags -->
-    <link rel="manifest" href="./manifest.json" />
-    <meta name="theme-color" content="#121212" />
-    <link rel="apple-touch-icon" href="./icon-192x192.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="KelvinFit">
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'brand-primary': '#00A9FF',
-              'brand-secondary': '#A0E9FF',
-              'dark-bg': '#121212',
-              'dark-surface': '#1e1e1e',
-              'dark-card': '#2a2a2a',
-              'dark-text': '#e0e0e0',
-              'dark-text-secondary': '#a0a0a0',
-            }
-          }
-        }
-      }
-    </script>
-    <style>
-      /* Custom utility to hide scrollbars */
-      .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-      }
-      .scrollbar-hide {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
-      }
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.26.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>KelvinFit</title>
+
+  <!-- PWA Tags -->
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#121212" />
+  <link rel="apple-touch-icon" href="./icon-192x192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="KelvinFit">
 </head>
-  <body class="bg-dark-bg text-dark-text">
-    <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
-  <script type="module" src="/index.tsx"></script>
+
+<body class="bg-dark-bg text-dark-text">
+  <div id="root"></div>
+  <script type="module" src="./index.tsx"></script>
 </body>
+
 </html>
