@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Exercise, Meal, WorkoutPlan, GeneratedWorkoutPlan } from '../types.ts';
 
-const ai = new GoogleGenAI({ apiKey: 'AIzaSyCEx-ewOOEYgyL2u2mspVEHdOSg95m_K00' });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || process.env.GEMINI_API_KEY || '' });
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 

@@ -8,7 +8,7 @@ const db = admin.firestore();
 // Initialize Gemini
 // Note: Ensure GEMINI_API_KEY is set in your Firebase Functions environment config
 // command: firebase functions:config:set gemini.key="YOUR_API_KEY"
-const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || 'AIzaSyCEx-ewOOEYgyL2u2mspVEHdOSg95m_K00' });
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 interface User {
     id: string;

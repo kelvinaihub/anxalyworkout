@@ -24,6 +24,8 @@ jobs:
 
       - name: Build Web App
         run: npm run build
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
       - name: Add iOS Platform (if not present)
         run: npx cap add ios || true
