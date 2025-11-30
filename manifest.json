@@ -1,0 +1,23 @@
+{
+  "name": "Kelvin Fitness Forever",
+  "short_name": "KelvinFit",
+  "description": "A comprehensive fitness application for managing workout and nutrition plans, tracking history, and sharing progress on a social feed. Features Gemini-powered suggestions for exercises and meals.",
+  "icons": [
+    {
+      "src": "./icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "theme_color": "#121212",
+  "background_color": "#121212"
+}

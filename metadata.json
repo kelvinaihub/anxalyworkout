@@ -1,0 +1,8 @@
+{
+  "name": "Anxaly AI 08-11 9AM",
+  "description": "A comprehensive fitness application for managing workout and nutrition plans, tracking history, and sharing progress on a social feed. Features Gemini-powered suggestions for exercises and meals.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

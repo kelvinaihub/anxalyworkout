@@ -1,0 +1,51 @@
+## Kelvin Fitness Forever - Application Memoir & Specification (Definitive Version)
+
+### I. Core Philosophy
+1.  **Architecture:** A responsive, mobile-first Progressive Web App (PWA) designed as a Single Page Application (SPA).
+2.  **Consistency & Separation:** All features are designed for a consistent experience. Crucially, features that look similar but have different origins (e.g., AI-generated vs. User-created workouts) are implemented in **separate, dedicated components** to ensure stability and maintainability.
+
+### II. Core Application Architecture
+1.  **Top-Level State Management (`App.tsx`):**
+    *   The core logic for generating the AI Daily Workout resides in `App.tsx`. This ensures the workout is generated **only once per day, in the background,** upon application startup. The state (`isGenerating`, `dailyAiPlan`) is managed centrally to prevent re-generation when switching tabs.
+2.  **Navigation System:**
+    *   **Mobile:** A primary `Footer` navigation bar is **fixed to the bottom** and is **always visible** across all main tabs (Feed, Workout, AI, Messages, Profile) for consistent access. It is only hidden during full-screen immersive views like an active workout session.
+    *   **Desktop/Tablet:** A global `DesktopHeader` is fixed to the top, providing consistent navigation across all main views except for the Profile screen.
+3.  **Component Structure (React Best Practices):**
+    *   **Rule of Hooks:** All React components are defined at the **top level of their respective files**. Defining components within the render function of another component is strictly forbidden, as it leads to "React error #300" (Invalid Hook Call) and causes the application to crash ("black screen" error). This rule has been enforced across all refactored screens (`FeedScreen`, `ProfileScreen`, `WorkoutScreen`, etc.).
+4.  **PWA & Offline Capability:**
+    *   The application uses a service worker (`sw.js`) with a stale-while-revalidate strategy for offline access.
+    *   The registration path in `index.tsx` is set to a direct relative path (`'./sw.js'`) to resolve cross-origin errors in sandboxed environments.
+
+### III. AI Feature Suite
+1.  **AI Daily Workout (End-to-End Flow):**
+    *   **Step 1 (Background Generation):** Triggered once daily in `App.tsx`. The process is transparent to the user via loading states on the `WorkoutScreen`.
+    *   **Step 2 (Dashboard Display):** The `WorkoutScreen` features a redesigned, professional dashboard that shows the status of the AI workout generation. Once complete, it displays a summary card for the "AI Daily Workout". Clicking the "Eye" icon on this card proceeds to the next step.
+    *   **Step 3 (Detailed View - `WorkoutPlanDetailScreen`):** This screen displays the full AI-generated plan. The layout is **100% identical** to the user's "Your Workout Plan" view, featuring a top summary card (`Mins`, `Kcal`, `Exercises`) and a detailed list of exercises with `Speaker` and `Eye` icons for audio playback and detailed instructions.
+    *   **Step 4 (Active Session - `AiActiveWorkoutScreen.tsx`):** **CRITICAL:** Starting an AI workout opens a **dedicated, separate screen (`AiActiveWorkoutScreen.tsx`)**. This ensures complete code and state separation from user-created plans, preventing bugs and ensuring stability. This screen features the full immersive UI.
+2.  **AI Coach (Workout Planner):**
+    *   A dedicated tool in the AI Hub for creating custom workouts.
+    *   Features a professional UI with gender-specific, locally-stored anatomical assets for instant, offline-capable loading.
+    *   The generation process is sequential (text first, then images one-by-one) to avoid API rate-limiting errors.
+3.  **AI-Powered Components:**
+    *   **Workout Summary Feedback:** The modal `WorkoutSummaryScreen` uses Gemini to generate motivational feedback in the "Feedback" tab.
+    *   **Exercise Assistance:** The `Eye` icon in workout lists opens a modal with AI-generated step-by-step instructions. The `Speaker` icon uses the browser's TTS engine to read out exercise details.
+
+### IV. Workout & Fitness Tracking Suite
+1.  **User-Created Workouts ("Your Workout Plan"):**
+    *   **Active Session (`ActiveWorkoutScreen.tsx`):** **CRITICAL:** This screen is **exclusively for user-created plans** and is completely separate from `AiActiveWorkoutScreen.tsx`. It features the same high-quality, immersive UI for a consistent user experience.
+2.  **Workout Dashboard (`WorkoutScreen.tsx`):**
+    *   This is the central hub for the Workout tab.
+    *   **Dynamic Header:** Greets the user by name ("Morning, Khun", "Afternoon, Khun", etc.) based on the time of day.
+    *   **Redesigned Layout:** The UI matches the latest reference image, featuring the "Today" card for the AI Daily Workout, a "More Workouts" section with quick-start AI prompts, a "Weekly Summary" card, and the "Active Minutes" bar chart (with values displayed on top of each bar).
+3.  **Workout Summary Modal (`WorkoutSummaryScreen.tsx`):**
+    *   Features a professional dark-theme design.
+    *   The date of the workout is displayed rotated vertically **inside** the summary card.
+    *   Includes functional tabs ("Summary", "Feedback", etc.) and time filters ("Today", "This Week").
+    *   The "Share" button uses the Web Share API to share workout stats to other apps.
+
+### V. Social & Utility Features
+*   **Fully Functional Screens:** `Videos`, `Friends`, `Marketplace`, and `Notifications` are fully implemented screens with rich UI and mock data.
+*   **Dynamic World:** The app is populated with over 100 programmatically generated users, and stories are dynamically generated to create a lively feed.
+*   **Professional Layouts:** The Feed and Profile screens use modern, multi-column layouts on larger screens for a professional experience.
+
+This document represents the complete and final specification of the application, incorporating all cumulative requests and architectural decisions to prevent future regressions.
