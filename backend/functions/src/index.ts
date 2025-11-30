@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, Modality } from '@google/genai';
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -16,6 +16,52 @@ interface User {
     gender: string;
     fitnessGoal?: string;
 }
+
+const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+
+// Helper function to generate image
+const generateExerciseImage = async (exerciseName: string, gender: string): Promise<string> => {
+    // Sanitize name
+    const simplifiedName = exerciseName.replace(/\s*\(.*\)\s*/, '').trim();
+    const prompt = `Photorealistic image of a fit ${gender === 'female' ? 'woman' : 'man'} performing the "${simplifiedName}" exercise. Full body shot, in a modern, well-lit gym. The person should be wearing appropriate fitness attire. The image should be high-quality, clear, and focused on demonstrating the correct form.`;
+
+    let retries = 3;
+    let currentDelay = 2000; // Optimized for Pro key
+
+    while (retries > 0) {
+        try {
+            const response = await genAI.models.generateContent({
+                model: 'gemini-2.5-flash-image',
+                contents: { parts: [{ text: prompt }] },
+                config: { responseModalities: [Modality.IMAGE] },
+            });
+
+            for (const part of response.candidates?.[0]?.content?.parts || []) {
+                if (part.inlineData) {
+                    return `data:image/png;base64,${part.inlineData.data}`;
+                }
+            }
+            throw new Error("No image data returned.");
+        } catch (error: any) {
+            const errorMessage = typeof error === 'string' ? error : (error.message || JSON.stringify(error));
+            if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('rate limit')) {
+                retries--;
+                if (retries > 0) {
+                    console.warn(`Rate limit for "${exerciseName}". Retrying in ${currentDelay}ms...`);
+                    await delay(currentDelay);
+                    currentDelay *= 1.5;
+                } else {
+                    console.error(`Exhausted retries for "${exerciseName}".`);
+                    return ""; // Return empty string on failure
+                }
+            } else {
+                console.error(`Error generating image for "${exerciseName}":`, error);
+                return ""; // Return empty string on other errors
+            }
+        }
+    }
+    return "";
+};
 
 // Helper function to generate workout using Gemini
 const generateWorkoutForUser = async (user: User): Promise<any> => {
@@ -37,6 +83,7 @@ const generateWorkoutForUser = async (user: User): Promise<any> => {
     `;
 
     try {
+        // 1. Generate Text Plan
         const response = await genAI.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
@@ -45,9 +92,27 @@ const generateWorkoutForUser = async (user: User): Promise<any> => {
         const text = response.text;
         if (!text) return null;
 
-        // Simple cleanup to ensure JSON
         const jsonStr = text.replace(/```json/g, '').replace(/```/g, '');
-        return JSON.parse(jsonStr);
+        const plan = JSON.parse(jsonStr);
+
+        // 2. Generate Images for all exercises
+        const allExercises = [
+            ...(plan.warmUp || []),
+            ...(plan.training || []),
+            ...(plan.stretching || [])
+        ];
+
+        console.log(`Generating images for ${allExercises.length} exercises for user ${user.id}...`);
+
+        for (const ex of allExercises) {
+            if (ex.name) {
+                ex.imageUrl = await generateExerciseImage(ex.name, user.gender);
+                // No artificial delay needed for Pro key, but a tiny 500ms safety buffer is good practice
+                await delay(500);
+            }
+        }
+
+        return plan;
     } catch (error) {
         console.error(`Error generating plan for user ${user.id}:`, error);
         return null;
@@ -56,7 +121,8 @@ const generateWorkoutForUser = async (user: User): Promise<any> => {
 
 // Scheduled Function: Runs every day at 00:00 (Midnight)
 // Timezone: Asia/Ho_Chi_Minh (Vietnam Time)
-export const dailyWorkoutGenerator = functions.pubsub
+// Timeout: 540 seconds (9 minutes) to handle image generation
+export const dailyWorkoutGenerator = functions.runWith({ timeoutSeconds: 540 }).pubsub
     .schedule('0 0 * * *')
     .timeZone('Asia/Ho_Chi_Minh')
     .onRun(async (context) => {
@@ -108,9 +174,6 @@ export const dailyWorkoutGenerator = functions.pubsub
                 } else {
                     console.error(`Failed to generate plan for user ${user.id}.`);
                 }
-
-                // Optional: Add a small delay between users to be safe with API limits
-                await new Promise(resolve => setTimeout(resolve, 1000));
             }
 
             console.log('Daily Workout Generation Job Completed.');

@@ -155,7 +155,7 @@ export const generateExerciseImage = async (exerciseName: string, gender: 'male'
   const prompt = `Photorealistic image of a fit ${gender === 'female' ? 'woman' : 'man'} performing the "${simplifiedName}" exercise. Full body shot, in a modern, well-lit gym. The person should be wearing appropriate fitness attire. The image should be high-quality, clear, and focused on demonstrating the correct form.`;
 
   let retries = 3;
-  let currentDelay = 65000; // Start with 65 seconds to be safe with 1 RPM limits
+  let currentDelay = 2000; // Optimized for Pro key: 2s initial delay
 
   while (retries > 0) {
     try {
